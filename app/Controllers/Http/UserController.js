@@ -1,6 +1,8 @@
 "use strict";
-const User = use("App/Models/User");
+const Database = use("Database");
 const { validateAll } = use("Validator");
+
+const User = use("App/Models/User");
 
 class UserController {
   async register({ auth, request, response }) {
@@ -42,9 +44,13 @@ class UserController {
 
     try {
       if (await auth.attempt(email, password)) {
-        let user = await User.findBy("email", email);
+        const user = await User.findBy("email", email);
+        const themes = await Database.table("themes").where(
+          "username",
+          user.username
+        );
         let accessToken = await auth.generate(user);
-        return response.json({ user: user, access_token: accessToken });
+        return response.json({ user: user, access_token: accessToken, themes });
       }
       return response.badRequest({ error: "User not exist" });
     } catch (e) {
