@@ -7,7 +7,8 @@ class NotificationsSchema extends Schema {
   up () {
     this.create('notifications', (table) => {
       table.increments()
-      table.string("username")
+      table.string("from")
+      table.string("to")
       table.string("themeId")
       table.string("payload")
       table.enum("opened",[true,false]).defaultTo(false)
