@@ -19,9 +19,11 @@ const Route = use("Route");
 Route.resource("theme", "ThemeController").middleware("auth");
 
 Route.group(() => {
+  Route.get("user/:id", "UserController.show");
   Route.post("login", "UserController.login");
   Route.post("register", "UserController.register");
-  Route.get("user/:id", "UserController.show");
+  Route.post("upload", "UserController.uploadProfile").middleware("auth");
+  Route.get("showProfile", "UserController.getImage")
 }).prefix("users");
 
 Route.any("*", ({ response }) =>

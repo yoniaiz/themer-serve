@@ -22,7 +22,9 @@ class ExceptionHandler extends BaseExceptionHandler {
    */
   async handle(error, { response }) {
     if (error.status === 401) response.unauthorized({ error: "unauthorized!" });
-    else response.status(error.status).send({ error: error.message });
+    if (error.code === "EBADCSRFTOKEN") {
+      response.forbidden("Cannot process your request.");
+    } else response.status(error.status).send({ error: error.message });
   }
 
   /**
