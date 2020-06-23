@@ -12,6 +12,8 @@ class ThemeSchema extends Schema {
       table.string('secondaryColor').notNullable()
       table.string('backgroundColor').notNullable()
       table.string('username', 80).notNullable()
+      table.float('rate').defaultTo(0)
+      table.integer('rateCount').defaultTo(0)
       table.string('fontColor').notNullable()
       table.timestamps()
     })

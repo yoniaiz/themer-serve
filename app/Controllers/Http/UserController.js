@@ -1,9 +1,9 @@
 "use strict";
-const Database = use("Database");
 const Event = use("Event");
-const fs = require("fs");
+const Helpers = use("Helpers");
 const Env = use("Env");
 const { validateAll } = use("Validator");
+const fs = require("fs");
 
 const User = use("App/Models/User");
 
@@ -36,6 +36,7 @@ class UserController {
       let accessToken = await auth.generate(user);
 
       Event.fire("new::user", user);
+
       return response.created({ user: user, access_token: accessToken });
     } catch (e) {
       console.error(e);
@@ -49,22 +50,23 @@ class UserController {
     try {
       if (await auth.attempt(email, password)) {
         const user = await User.findBy("email", email);
-        const themes = await Database.table("themes").where(
-          "username",
-          user.username
-        );
+        const themes = await user.themes().fetch();
         let accessToken = await auth.generate(user);
-        return response.json({ user: user, access_token: accessToken, themes });
+
+        return response.json({ user, access_token: accessToken, themes });
       }
-      return response.badRequest({ error: "User not exist" });
+      return response.badRequest();
     } catch (e) {
+      if(e.name === "UserNotFoundException"){
+        return response.notFound({ error: "User not exist" });
+      }
       return response.internalServerError({ error: e.message });
     }
   }
 
   show({ auth, params }) {
     if (auth.user.id !== Number(params.id)) {
-      return "You cannot see someone else's profile";
+      return "You cannot see someone else profile";
     }
     return auth.user;
   }
@@ -102,10 +104,10 @@ class UserController {
     return response.created({ user });
   }
 
-  async getImage({ request, response }) {
+  async getImage({ request }) {
     const { path } = request.get();
     try {
-      await fs.promises.access(`public/${path}`);
+      await fs.promises.access(Helpers.publicPath(path));
       return `${Env.get("APP_URL")}/${path}`;
     } catch (error) {
       return `${Env.get("APP_URL")}/default-avatar.png`;

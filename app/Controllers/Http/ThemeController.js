@@ -115,6 +115,34 @@ class ThemeController {
 
     return response.ok(theme);
   }
+
+  async rateTheme({ auth, params, request, response }) {
+    try {
+      await auth.check();
+      const { rate } = request.only(["rate"]);
+
+      if (rate <= 0 || rate > 5) {
+        return response.badRequest({ message: "invalid rate" });
+      }
+
+      const [theme, error] = await this._getTheme(params.id);
+      if (error) return response.notFound(error);
+
+      let count = theme.rateCount;
+      const totalPrevRate = theme.rate * count;
+      theme.rate = (totalPrevRate + rate) / ++count;
+      theme.rateCount = count;
+
+      await theme.save();
+
+      return response.json({
+        theme,
+        rate,
+      });
+    } catch (e) {
+      return response.internalServerError({ error: e.message });
+    }
+  }
 }
 
 module.exports = ThemeController;
