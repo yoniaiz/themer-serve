@@ -35,8 +35,6 @@ class UserController {
       });
       let accessToken = await auth.generate(user);
 
-      Event.fire("new::user", user);
-
       return response.created({ user: user, access_token: accessToken });
     } catch (e) {
       console.error(e);

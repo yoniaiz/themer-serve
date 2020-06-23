@@ -1,5 +1,7 @@
 "use strict";
 const { validateAll } = use("Validator");
+const Event = use("Event");
+
 const Theme = use("App/Models/Theme");
 
 class ThemeController {
@@ -135,6 +137,7 @@ class ThemeController {
 
       await theme.save();
 
+      Event.fire("new::rate", { auth, theme, rate});
       return response.json({
         theme,
         rate,
