@@ -32,7 +32,9 @@ class UserController {
         email,
         password,
       });
-      let accessToken = await auth.generate(user);
+
+      const createdUser = await User.findBy("email", email)
+      let accessToken = await auth.generate(createdUser);
 
       return response.created({ user: user, access_token: accessToken });
     } catch (e) {
