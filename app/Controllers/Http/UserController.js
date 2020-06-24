@@ -49,13 +49,19 @@ class UserController {
       if (await auth.attempt(email, password)) {
         const user = await User.findBy("email", email);
         const themes = await user.themes().fetch();
+        const notifications = await user.notifications().fetch();
         let accessToken = await auth.generate(user);
 
-        return response.json({ user, access_token: accessToken, themes });
+        return response.json({
+          user,
+          access_token: accessToken,
+          themes,
+          notifications,
+        });
       }
       return response.badRequest();
     } catch (e) {
-      if(e.name === "UserNotFoundException"){
+      if (e.name === "UserNotFoundException") {
         return response.notFound({ error: "User not exist" });
       }
       return response.internalServerError({ error: e.message });

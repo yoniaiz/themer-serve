@@ -19,6 +19,10 @@ class User extends Model {
     return this.hasMany("App/Models/Theme", "username", "username");
   }
 
+  notifications() {
+    return this.hasMany("App/Models/Notification", "username", "from");
+  }
+
   static boot() {
     super.boot();
 

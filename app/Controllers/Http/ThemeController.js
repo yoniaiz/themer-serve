@@ -120,7 +120,6 @@ class ThemeController {
 
   async rateTheme({ auth, params, request, response }) {
     try {
-      await auth.check();
       const { rate } = request.only(["rate"]);
 
       if (rate <= 0 || rate > 5) {
@@ -130,14 +129,36 @@ class ThemeController {
       const [theme, error] = await this._getTheme(params.id);
       if (error) return response.notFound(error);
 
+      const user = await auth.getUser();
+
+      const notification = await user
+        .notifications()
+        .where("themeId", params.id)
+        .fetch();
+
       let count = theme.rateCount;
       const totalPrevRate = theme.rate * count;
+
+      if (notification.last()) {
+        // update existing rate of the user
+        const prevRate = parseFloat(notification.last().payload);
+        theme.rate = (totalPrevRate - prevRate + rate) / count;
+        await theme.save();
+
+        Event.fire("new::rate", { user, theme, rate });
+
+        return response.json({
+          theme,
+          rate,
+        });
+      }
+
       theme.rate = (totalPrevRate + rate) / ++count;
       theme.rateCount = count;
 
       await theme.save();
 
-      Event.fire("new::rate", { auth, theme, rate});
+      Event.fire("new::rate", { user, theme, rate });
       return response.json({
         theme,
         rate,

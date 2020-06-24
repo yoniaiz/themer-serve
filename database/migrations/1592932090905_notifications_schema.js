@@ -11,6 +11,7 @@ class NotificationsSchema extends Schema {
       table.string("to")
       table.string("themeId")
       table.string("payload")
+      table.string("message")
       table.enum("opened",[true,false]).defaultTo(false)
       table.timestamps()
     })
