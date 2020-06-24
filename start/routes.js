@@ -27,6 +27,10 @@ Route.group(() => {
   Route.get("showProfile", "UserController.getImage");
 }).prefix("users");
 
+Route.post("/notification", "NotificationController.markAsOpened").middleware(
+  "auth"
+);
+
 Route.any("*", ({ response }) =>
   response.notFound({ error: "Route not exist!" })
 );
