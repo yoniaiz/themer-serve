@@ -1,5 +1,4 @@
 "use strict";
-const Event = use("Event");
 const Helpers = use("Helpers");
 const Env = use("Env");
 const { validateAll } = use("Validator");
@@ -49,14 +48,21 @@ class UserController {
       if (await auth.attempt(email, password)) {
         const user = await User.findBy("email", email);
         const themes = await user.themes().fetch();
-        const notifications = await user.notifications().fetch();
+
+        const send_notifications = await user.send_notifications().fetch();
+        const received_notifications = await user
+          .received_notifications()
+          .orderBy("created_at", "desc")
+          .fetch();
+
         let accessToken = await auth.generate(user);
 
         return response.json({
           user,
           access_token: accessToken,
           themes,
-          notifications,
+          send_notifications,
+          received_notifications,
         });
       }
       return response.badRequest();
